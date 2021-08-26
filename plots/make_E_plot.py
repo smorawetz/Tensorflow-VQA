@@ -57,7 +57,7 @@ for L in Ls:
     for T in Ts:
         T0 = T
         for SEED in SEEDs:
-            folder = "../results/{0}_L{1}_results/L{1}_T{2}_nh{3}_lr{4}_Ns{5}_Nw{6}_Nt{7}_Na{8}_seed{9}".format(
+            folder = "../plots_results/{0}_L{1}_results/L{1}_T{2}_nh{3}_lr{4}_Ns{5}_Nw{6}_Nt{7}_Na{8}_seed{9}".format(
                 model_type, L, T0, NH, LR, NS, NW, NT, NA, SEED
             )
             fname = "{0}/training_info.txt".format(folder)
