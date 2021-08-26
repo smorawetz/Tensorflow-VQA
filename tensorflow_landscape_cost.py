@@ -14,8 +14,8 @@ def visualize_landscape_cost(
     #### NOW NEW STUFF ####
     getFreeEnergy,
     Nqubits,
-    # errors_prediction,
-    output_chain_Train,
+    errors_prediction,
+    # output_chain_Train,
     log_probs_tensor,
     #### END NEW STUFF ####
     T,
@@ -92,6 +92,8 @@ def visualize_landscape_cost(
                     assignments_dict[var_num],
                     feed_dict={placeholders_dict[var_num]: new_val},
                 )
+
+            output_chain_Train = sess.run(errors_prediction)
 
             curr_loss = sess.run(
                 cost,

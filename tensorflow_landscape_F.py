@@ -19,6 +19,11 @@ def visualize_landscape_F(
     errors_prediction,
     # output_chain_Train,
     log_probs_tensor,
+    #### VCA SPECIFIC STUFF ####
+    Errors,
+    new_samples_placeholder,
+    new_log_probs_tensor,
+    #### END VCA SPECIFIC STUFF ####
     #### END NEW STUFF ####
     T,
     num_samples,
@@ -97,15 +102,24 @@ def visualize_landscape_F(
 
             output_chain_Train = sess.run(errors_prediction)
 
-            # print(output_chain_Train)
-
             log_probs = sess.run(
-                log_probs_tensor, feed_dict={errors_placeholder: output_chain_Train},
+                log_probs_tensor,
+                feed_dict={errors_placeholder: output_chain_Train},
             )
 
             curr_F = np.mean(
                 getFreeEnergy(
-                    Nqubits, output_chain_Train, log_probs, T, None, None, None
+                    sess,
+                    Errors,
+                    Nqubits,
+                    output_chain_Train,
+                    log_probs,
+                    new_samples_placeholder,
+                    new_log_probs_tensor,
+                    T,
+                    None,
+                    None,
+                    None,
                 )
             )
 

@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import time
+import math
 import random
 from random import choices
 
@@ -10,14 +11,15 @@ from modified_MDRNNfunction import RNNfunction
 from modified_HelperFunctionsandDataGeneration import *
 
 from tensorflow_landscape_F import visualize_landscape_F
-from tensorflow_landscape_cost import visualize_landscape_cost
+# from tensorflow_landscape_cost import visualize_landscape_cost
+from tensorflow_landscape_cost_test import visualize_landscape_cost
 
 
 ###################################################
 ########## DEFINE VISUALIZATION STUFF HERE ########
 ###################################################
 
-N_POINTS = 201
+N_POINTS = 21
 
 
 def getFreeEnergy(
@@ -241,12 +243,12 @@ def annealingSurfaceCode(
             )  # You need to feed in the syndromes
 
             # The cost function
-            cost = tf.reduce_mean(
+            cost = 2 * tf.reduce_mean(
                 tf.multiply(log_probs_, tf.stop_gradient(freeEnergy_placeholder))
             ) - tf.reduce_mean(
                 tf.stop_gradient(freeEnergy_placeholder)
             ) * tf.reduce_mean(
-                log_probs_
+                0.5 * log_probs_
             )
 
             print("Created cost function placeholder")
@@ -514,29 +516,35 @@ def annealingSurfaceCode(
                             savelocation, names_dict[step], max_change, N_POINTS
                         )
                     )
-                    # visualize_landscape_F(
-                    # sess,
-                    # #### OLD STUFF HERE ####
-                    # cost,
-                    # errors_placeholder,
-                    # # output_chain_Train,
-                    # freeEnergy_placeholder,
-                    # freeEnergy,
-                    # #### NOW NEW STUFF ####
-                    # getFreeEnergy,
-                    # Nqubits,
-                    # errors_prediction,
-                    # # output_chain_Train,
-                    # log_probs_tensor,
-                    # #### END NEW STUFF ####
-                    # T,
-                    # numsamples,
-                    # max_change,
-                    # N_POINTS,
-                    # deltas,
-                    # etas,
-                    # fname_F,
-                    # )
+                    visualize_landscape_F(
+                        sess,
+                        #### OLD STUFF HERE ####
+                        cost,
+                        errors_placeholder,
+                        # output_chain_Train,
+                        freeEnergy_placeholder,
+                        freeEnergy,
+                        #### NOW NEW STUFF ####
+                        getFreeEnergy,
+                        Nqubits,
+                        errors_prediction,
+                        # output_chain_Train,
+                        log_probs_tensor,
+                        #### VCA SPECIFIC STUFF ####
+                        Errors,
+                        new_samples_placeholder,
+                        new_log_probs_tensor,
+                        #### END VCA SPECIFIC STUFF ####
+                        #### END NEW STUFF ####
+                        T,
+                        numsamples,
+                        max_change,
+                        N_POINTS,
+                        deltas,
+                        etas,
+                        fname_F,
+                    )
+                    print("making landscape, B = ", T)
                     # visualize_landscape_cost(
                         # sess,
                         # #### OLD STUFF HERE ####
@@ -548,8 +556,8 @@ def annealingSurfaceCode(
                         # #### NOW NEW STUFF ####
                         # getFreeEnergy,
                         # Nqubits,
-                        # # errors_prediction,
-                        # output_chain_Train,
+                        # errors_prediction, ## NOTE: GET RID OF LATER
+                        # # output_chain_Train,
                         # log_probs_tensor,
                         # #### END NEW STUFF ####
                         # T,
@@ -567,6 +575,13 @@ def annealingSurfaceCode(
                         samples.append(sample)
                     fname = "{0}/{1}_samples.txt".format(savelocation, names_dict[step])
                     np.savetxt(fname, np.array(samples))
+                elif math.isclose(T, 0.1):
+                    samples = []
+                    for sample in output_chain_Train:
+                        samples.append(sample)
+                    fname = "{0}/low_B_samples.txt".format(savelocation)
+                    np.savetxt(fname, np.array(samples))
+
 
                 #####################################################
                 ############# VISUALIZATION STUFF ENDS ##############
@@ -574,7 +589,7 @@ def annealingSurfaceCode(
 
                 modelCost.append(TotalCost)
                 free_energy.append(np.mean(freeEnergy))
-                energy.append(np.mean(freeEnergy - T * log_probs))
+                energy.append(np.mean(freeEnergy))
                 temperatures.append(T)
                 if step % 5 == 0:
                     print(

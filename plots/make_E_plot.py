@@ -21,18 +21,18 @@ plt.style.use("seaborn-deep")
 
 # Define parameters of the study to make the visualization
 
-Ls = [3]  # Side length of lattice
+Ls = [3, 4, 5]  # Side length of lattice
 NH = 40  # Number of hidden units
 LR = 0.001  # Learning rate
 NS = 100  # Number of samples to compute F
 NW = 1000  # Number of warmup steps
 NT = 5  # Number of training steps
 NA = 10000  # Number of annealing steps
-SEEDs = [0, 1, 2, 3, 4]  # Random seed
+SEEDs = [0, 1, 2, 3, 4, 5]  # Random seed
 # MAX_CHANGES = [0.1, 1]  # Possible values the landscape can range over
 MAX_CHANGES = [1]  # Possible values the landscape can range over
 # LANDSCAPE_TYPES = ["F", "cost"]
-LANDSCAPE_TYPES = ["F"]
+LANDSCAPE_TYPES = ["cost"]
 
 NUM_MID_VIZ = 3  # Number of visualizations made during annealing
 LANDSCAPE_TIMES = ["init", "warmup", "completion"]  # Landscape before or after warmup
@@ -66,39 +66,37 @@ for L in Ls:
 
             fig, ax = plt.subplots()
 
-
             T = data[:, 1]
             F = data[:, 2]
 
-            ax.set_xlabel(r"$T$")
+            ax.set_xlabel(r"$B$")
             ax.set_ylabel(r"$\langle H \rangle / L^2$")
 
             ax.set_title("Average energy per spin during annealing")
 
-            ax.plot(T, F / L ** 2, "k-", label="VQA Results")
+            ax.plot(T, F / (L ** 2), "k-", label="VQA Results")
 
             # load in data to compare with ED
-            B_data = "exact_data/B_data_L{0}.txt".format(L)
-            ground_state_data = "exact_data/ground_state_E_L{0}.txt".format(L)
-            excited_state_data = "exact_data/first_excited_state_E_L{0}.txt".format(L)
+            B_data = "exact_data/lanczos_B_data_L{0}.txt".format(L)
+            energy_states_data = "exact_data/lanczos_gs_energies_L{0}.txt".format(L)
 
             B_data = np.loadtxt(B_data)
-            ground_state_data = np.loadtxt(ground_state_data)
-            excited_state_data = np.loadtxt(excited_state_data)
+            energy_states_data = np.loadtxt(energy_states_data)
+
+            states_to_plot = [0, 1]  # which energy states to plot
 
             ax.plot(
-                B_data, ground_state_data / L ** 2, "b-", label="Groundstate from ED"
-            )
-            ax.plot(
-                B_data, excited_state_data / L ** 2, "r-", label="Excited state from ED"
+                B_data,
+                energy_states_data / L ** 2,
+                "r-",
+                label="Ground state energy",
             )
 
-            ax.set_ylim(-1, 0)
+            # ax.set_ylim(-1, 0)
 
-            plot_name = (
-                "{0}_L{1}_T{2}_nh{3}_lr{4}_Ns{5}_Nw{6}_Nt{7}_Na{8}_seed{9}_E_vs_T.png"
-                .format(model_type, L, T0, NH, LR, NS, NW, NT, NA, SEED)
+            plot_name = "plots_E/{0}_L{1}_T{2}_nh{3}_lr{4}_Ns{5}_Nw{6}_Nt{7}_Na{8}_seed{9}_E_vs_T.png".format(
+                model_type, L, T0, NH, LR, NS, NW, NT, NA, SEED
             )
-            fig.legend(frameon=False)
+            fig.legend(frameon=False, loc=[0.15, 0.2])
 
             plt.savefig(plot_name, bbox_inches="tight")

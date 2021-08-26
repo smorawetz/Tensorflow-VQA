@@ -297,6 +297,8 @@ def SyndromeX(
     ### OFF-DIAG HERE ###
     #####################
 
+    time1 = time.time()
+
     flipped_spins = np.expand_dims(errors, axis=2)  # spin-flip configs along new axis
     flipped_spins = np.repeat(flipped_spins, N, axis=2)
     ref_spins = np.copy(flipped_spins)
@@ -304,16 +306,27 @@ def SyndromeX(
         flipped_spins[:, i, i][ref_spins[:, i, i] == 1] = 0
         flipped_spins[:, i, i][ref_spins[:, i, i] == 0] = 1
 
-    log_probs = np.zeros(flipped_spins.shape)
-
     for i in range(N):  # calculate probs one at a time
         log_probs = sess.run(
             new_log_probs_tensor,
             feed_dict={new_samples_placeholder: flipped_spins[:, :, i]},
         )
-        H_per_sample += -B * np.sum(
-            np.exp(0.5 * log_probs - 0.5 * base_log_probs), axis=0
-        )
+
+        # print(log_probs.shape)
+        # print(base_log_probs.shape)
+        # H_per_sample += -B * np.sum(
+            # np.exp(0.5 * log_probs - 0.5 * base_log_probs), axis=0
+        # )
+        H_per_sample += -B * np.exp(0.5 * log_probs - 0.5 * base_log_probs)
+        # print("off-diag contrib is ", -B * np.exp(0.5 * log_probs - 0.5 * base_log_probs))
+
+        # print("off diagonal part is", log_probs)
+        # print("diagonal part is ", base_log_probs)
+
+        # print("H_per_sample is ", H_per_sample)
+
+
+    time2 = time.time()
 
     #####################
     ### OFF-DIAG ENDS ###
@@ -328,6 +341,12 @@ def SyndromeX(
             * (2 * errors[:, second_index] - 1)
             * (2 * errors[:, third_index] - 1)
         ) / 2
+        # print("diag contrib is ", (2 * errors[:, first_index] - 1) * (2 * errors[:, second_index] - 1) * (2 * errors[:, third_index] - 1) / 2)
+
+    time3 = time.time()
+
+    print("off-diag time is ", time2 - time1)
+    print("diag time is ", time3 - time2)
 
     return H_per_sample
 

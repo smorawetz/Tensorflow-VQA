@@ -4,11 +4,11 @@ import tensorflow as tf
 from modified_NM_jeremy_code import annealingSurfaceCode
 
 # Define physical parameters
-L = 4  # Length of lattice along one side
+L = 3  # Length of lattice along one side
 
 # Define training parameters
-N_warmup = 1000  # Number of warmup steps
-N_anneal = 10000  # Number of annealing steps
+N_warmup = 100  # Number of warmup steps
+N_anneal = 100  # Number of annealing steps
 N_train = 5  # Number of training steps
 
 N_hidden = 40  # Number of hidden/memory units
